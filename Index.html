@@ -1,0 +1,1119 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pra ti | Plataforma Imobiliária de Moçambique</title>
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#f0fdf4',
+                            100: '#dcfce7',
+                            500: '#22c55e',
+                            600: '#16a34a',
+                            700: '#15803d',
+                            800: '#166534',
+                            900: '#14532d',
+                        },
+                        mpesa: '#e11900',
+                        emola: '#ff6600'
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <!-- FontAwesome Icons CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Google Fonts Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Leaflet.js CSS e JS para o Mapa Interativo de Moçambique -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        .leaflet-popup-content-wrapper { border-radius: 12px; padding: 0; overflow: hidden; }
+        .leaflet-popup-content { margin: 0 !important; width: 220px !important; }
+        .glass-card { background: rgba(255, 255, 255, 0.92); backdrop-filter: blur(12px); }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800 pb-20 md:pb-0">
+
+    <!-- ========================================== -->
+    <!-- POP-UP DE BOAS-VINDAS E APRESENTAÇÃO (Modal) -->
+    <!-- ========================================== -->
+    <div id="welcomeModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm transition-opacity duration-300">
+        <div class="bg-white rounded-3xl max-w-2xl w-full p-6 md:p-8 shadow-2xl relative overflow-hidden animate-fade-in border border-emerald-100 max-h-[90vh] overflow-y-auto">
+            
+            <!-- Elemento decorativo de fundo -->
+            <div class="absolute -top-12 -right-12 w-40 h-40 bg-brand-100 rounded-full blur-2xl opacity-60"></div>
+            
+            <button onclick="closeWelcomeModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-700 w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center transition">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+
+            <div class="flex items-center gap-3 mb-4">
+                <div class="bg-brand-500 text-white p-3 rounded-2xl flex items-center justify-center shadow-lg shadow-brand-500/30">
+                    <i class="fa-solid fa-house-circle-check text-2xl"></i>
+                </div>
+                <div>
+                    <span class="text-xs font-bold uppercase tracking-wider text-brand-600 bg-brand-50 px-2.5 py-1 rounded-full">Plataforma Imobiliária Oficial</span>
+                    <h2 class="text-2xl md:text-3xl font-extrabold text-gray-900">Bem-vindo à <span class="text-brand-600">Pra ti</span>!</h2>
+                </div>
+            </div>
+
+            <p class="text-gray-600 mb-6 leading-relaxed text-sm md:text-base">
+                A forma mais rápida, segura e transparente de arrendar ou comprar imóveis em <strong>Moçambique</strong>. Conectamos proprietários e clientes com total garantia de pagamento.
+            </p>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                <div class="bg-emerald-50/60 p-4 rounded-2xl border border-emerald-100 text-center">
+                    <div class="w-10 h-10 bg-emerald-100 text-brand-700 rounded-xl flex items-center justify-center mx-auto mb-2 text-lg">
+                        <i class="fa-solid fa-[#10b981] fa-shield-halved"></i>
+                    </div>
+                    <h3 class="font-bold text-gray-800 text-sm">Pagamento Protegido</h3>
+                    <p class="text-xs text-gray-500 mt-1">O seu valor fica em custódia até à confirmação do negócio.</p>
+                </div>
+
+                <div class="bg-blue-50/60 p-4 rounded-2xl border border-blue-100 text-center">
+                    <div class="w-10 h-10 bg-blue-100 text-blue-700 rounded-xl flex items-center justify-center mx-auto mb-2 text-lg">
+                        <i class="fa-solid fa-badge-check"></i>
+                    </div>
+                    <h3 class="font-bold text-gray-800 text-sm">Imóveis Verificados</h3>
+                    <p class="text-xs text-gray-500 mt-1">Fotos reais, localização exata e documentação analisada.</p>
+                </div>
+
+                <div class="bg-amber-50/60 p-4 rounded-2xl border border-amber-100 text-center">
+                    <div class="w-10 h-10 bg-amber-100 text-amber-700 rounded-xl flex items-center justify-center mx-auto mb-2 text-lg">
+                        <i class="fa-solid fa-handshake"></i>
+                    </div>
+                    <h3 class="font-bold text-gray-800 text-sm">Modelo Justo (10%)</h3>
+                    <p class="text-xs text-gray-500 mt-1">90% direto para o proprietário e 10% retidos com garantia total.</p>
+                </div>
+            </div>
+
+            <div class="flex items-center justify-between p-4 bg-gray-50 rounded-2xl border border-gray-200 mb-6">
+                <div class="flex items-center gap-3">
+                    <i class="fa-solid fa-mobile-screen-button text-brand-600 text-xl"></i>
+                    <span class="text-xs md:text-sm text-gray-600 font-medium">Aceitamos M-Pesa, e-Mola e Transferência Bancária</span>
+                </div>
+                <div class="flex gap-2">
+                    <span class="px-2 py-1 bg-red-100 text-mpesa text-xs font-bold rounded">M-Pesa</span>
+                    <span class="px-2 py-1 bg-orange-100 text-emola text-xs font-bold rounded">e-Mola</span>
+                </div>
+            </div>
+
+            <button onclick="closeWelcomeModal()" class="w-full bg-brand-600 hover:bg-brand-700 text-white font-bold py-3.5 px-6 rounded-2xl shadow-lg shadow-brand-600/30 transition text-center flex items-center justify-center gap-2">
+                <span>Começar a Explorar Imóveis</span>
+                <i class="fa-solid fa-arrow-right"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- CABEÇALHO / NAVBAR                         -->
+    <!-- ========================================== -->
+    <header class="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-gray-100 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-20">
+                
+                <!-- Logo Pra ti -->
+                <a href="#" onclick="filterByCategory('all')" class="flex items-center gap-2.5 group">
+                    <div class="w-10 h-10 bg-brand-600 group-hover:bg-brand-700 rounded-2xl flex items-center justify-center text-white shadow-md shadow-brand-600/30 transition">
+                        <i class="fa-solid fa-house-chimney text-xl"></i>
+                    </div>
+                    <div>
+                        <span class="text-2xl font-black text-gray-900 tracking-tight">Pra <span class="text-brand-600">ti</span></span>
+                        <span class="block text-[10px] font-bold text-gray-400 tracking-wider -mt-1">MOÇAMBIQUE</span>
+                    </div>
+                </a>
+
+                <!-- Links Principais Desktop -->
+                <nav class="hidden md:flex items-center gap-8 text-sm font-semibold text-gray-600">
+                    <button onclick="filterByPurpose('Comprar')" class="hover:text-brand-600 transition">Comprar</button>
+                    <button onclick="filterByPurpose('Arrendar')" class="hover:text-brand-600 transition">Arrendar</button>
+                    <button onclick="filterByCategory('Quarto')" class="hover:text-brand-600 transition">Quartos</button>
+                    <button onclick="filterByCategory('Terreno')" class="hover:text-brand-600 transition">Terrenos</button>
+                    <a href="#mapa-section" class="hover:text-brand-600 transition flex items-center gap-1.5 text-brand-600 font-bold bg-brand-50 px-3 py-1.5 rounded-full">
+                        <i class="fa-solid fa-map-location-dot"></i> Mapa
+                    </a>
+                </nav>
+
+                <!-- Botões de Ação Direita -->
+                <div class="flex items-center gap-3">
+                    <button onclick="openModal('dashboardModal')" class="hidden sm:flex items-center gap-2 text-xs font-bold text-gray-700 hover:bg-gray-100 px-3 py-2 rounded-xl border border-gray-200 transition">
+                        <i class="fa-solid fa-chart-line text-brand-600"></i>
+                        <span>Painel / Saldo</span>
+                    </button>
+
+                    <button onclick="openModal('addPropertyModal')" class="bg-brand-600 hover:bg-brand-700 text-white text-sm font-bold px-4 py-2.5 rounded-2xl shadow-md shadow-brand-600/20 transition flex items-center gap-2">
+                        <i class="fa-solid fa-plus-circle text-base"></i>
+                        <span class="hidden sm:inline">Publicar Imóvel</span>
+                    </button>
+
+                    <button onclick="openWelcomeModal()" class="text-gray-400 hover:text-brand-600 p-2 rounded-xl transition" title="Sobre a plataforma">
+                        <i class="fa-solid fa-circle-info text-xl"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- ========================================== -->
+    <!-- HERO SECTION COM PESQUISA                  -->
+    <!-- ========================================== -->
+    <section class="relative bg-gray-900 py-16 md:py-24 px-4 overflow-hidden">
+        <!-- Imagem de fundo responsiva de alta qualidade -->
+        <div class="absolute inset-0 z-0">
+            <img src="https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=1600&q=80" alt="Casa em Moçambique" class="w-full h-full object-cover opacity-35 scale-105 transform hover:scale-100 transition duration-1000">
+            <div class="absolute inset-0 bg-gradient-to-t from-gray-900 via-gray-900/60 to-transparent"></div>
+        </div>
+
+        <div class="relative z-10 max-w-5xl mx-auto text-center">
+            <span class="inline-block px-4 py-1.5 bg-brand-500/20 border border-brand-500/30 text-brand-300 font-bold text-xs uppercase tracking-widest rounded-full mb-4">
+                🇲🇿 A plataforma imobiliária #1 de Moçambique
+            </span>
+            <h1 class="text-3xl md:text-5xl lg:text-6xl font-black text-white tracking-tight mb-4 leading-tight">
+                ENCONTRE O SEU PRÓXIMO <span class="text-brand-500">IMÓVEL</span>
+            </h1>
+            <p class="text-gray-300 text-sm md:text-lg max-w-2xl mx-auto mb-8">
+                Casas, quartos, apartamentos, terrenos e espaços comerciais para comprar ou arrendar nas melhores localizações do país.
+            </p>
+
+            <!-- Caixa de Pesquisa Interativa -->
+            <div class="bg-white p-4 md:p-6 rounded-3xl shadow-2xl text-left max-w-4xl mx-auto border border-gray-100">
+                
+                <!-- Tabs Comprar / Arrendar -->
+                <div class="flex gap-2 mb-4 border-b border-gray-100 pb-3">
+                    <button id="tabAll" onclick="setSearchPurpose('all')" class="px-5 py-2 rounded-xl font-bold text-sm bg-brand-600 text-white transition shadow-sm">Todos</button>
+                    <button id="tabArrendar" onclick="setSearchPurpose('Arrendar')" class="px-5 py-2 rounded-xl font-bold text-sm text-gray-600 hover:bg-gray-100 transition">Arrendar</button>
+                    <button id="tabComprar" onclick="setSearchPurpose('Comprar')" class="px-5 py-2 rounded-xl font-bold text-sm text-gray-600 hover:bg-gray-100 transition">Comprar</button>
+                </div>
+
+                <!-- Campos de Filtro -->
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
+                    <!-- O que procura? -->
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 uppercase mb-1">O que procura?</label>
+                        <select id="searchCategory" class="w-full bg-gray-50 border border-gray-200 rounded-xl p-3 text-sm font-semibold text-gray-800 focus:ring-2 focus:ring-brand-500 focus:outline-none">
+                            <option value="all">Todas as categorias</option>
+                            <option value="Casa">Casa</option>
+                            <option value="Quarto">Quarto</option>
+                            <option value="Apartamento">Apartamento</option>
+                            <option value="Terreno">Terreno</option>
+                            <option value="Espaço Comercial">Espaço Comercial</option>
+                        </select>
+                    </div>
+
+                    <!-- Cidade / Bairro -->
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Cidade / Bairro</label>
+                        <select id="searchCity" class="w-full bg-gray-50 border border-gray-200 rounded-xl p-3 text-sm font-semibold text-gray-800 focus:ring-2 focus:ring-brand-500 focus:outline-none">
+                            <option value="all">Moçambique (Todas)</option>
+                            <option value="Maputo">Maputo (Polana, Sommerschield...)</option>
+                            <option value="Matola">Matola (Liberdade, Malhampsene...)</option>
+                            <option value="Beira">Beira (Pontagêa, Macuti...)</option>
+                            <option value="Nampula">Nampula (Central, Muhala...)</option>
+                            <option value="Pemba">Pemba (Natite, Wimbe...)</option>
+                            <option value="Chimoio">Chimoio</option>
+                            <option value="Nacala">Nacala Porto</option>
+                        </select>
+                    </div>
+
+                    <!-- Preço Máximo -->
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Preço Máximo (MT)</label>
+                        <select id="searchPrice" class="w-full bg-gray-50 border border-gray-200 rounded-xl p-3 text-sm font-semibold text-gray-800 focus:ring-2 focus:ring-brand-500 focus:outline-none">
+                            <option value="all">Sem limite de preço</option>
+                            <option value="15000">Até 15.000 MT</option>
+                            <option value="30000">Até 30.000 MT</option>
+                            <option value="60000">Até 60.000 MT</option>
+                            <option value="150000">Até 150.000 MT</option>
+                            <option value="5000000">Até 5.000.000 MT</option>
+                        </select>
+                    </div>
+
+                    <!-- Botão Pesquisar -->
+                    <div class="flex items-end">
+                        <button onclick="applyFilters()" class="w-full bg-brand-600 hover:bg-brand-700 text-white font-bold p-3 rounded-xl shadow-lg shadow-brand-600/30 transition flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-magnifying-glass"></i>
+                            <span>Pesquisar</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ========================================== -->
+    <!-- SEÇÃO CATEGORIAS                            -->
+    <!-- ========================================== -->
+    <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div class="flex items-center justify-between mb-8">
+            <div>
+                <h2 class="text-2xl font-black text-gray-900">O que está à procura?</h2>
+                <p class="text-sm text-gray-500 mt-1">Explore os imóveis organizados por tipo de utilização</p>
+            </div>
+            <button onclick="filterByCategory('all')" class="text-brand-600 text-sm font-bold hover:underline flex items-center gap-1">
+                Ver todos <i class="fa-solid fa-chevron-right text-xs"></i>
+            </button>
+        </div>
+
+        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
+            <!-- Card Casas -->
+            <div onclick="filterByCategory('Casa')" class="cursor-pointer bg-white p-5 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md hover:border-brand-300 transition text-center group">
+                <div class="w-12 h-12 bg-emerald-50 text-brand-600 rounded-2xl flex items-center justify-center mx-auto mb-3 text-2xl group-hover:scale-110 transition">
+                    🏠
+                </div>
+                <h3 class="font-bold text-gray-900">Casas</h3>
+                <p class="text-xs text-gray-500 mt-1">Para comprar ou arrendar</p>
+            </div>
+
+            <!-- Card Quartos -->
+            <div onclick="filterByCategory('Quarto')" class="cursor-pointer bg-white p-5 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md hover:border-brand-300 transition text-center group">
+                <div class="w-12 h-12 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-3 text-2xl group-hover:scale-110 transition">
+                    🛏️
+                </div>
+                <h3 class="font-bold text-gray-900">Quartos</h3>
+                <p class="text-xs text-gray-500 mt-1">Individuais e partilhados</p>
+            </div>
+
+            <!-- Card Apartamentos -->
+            <div onclick="filterByCategory('Apartamento')" class="cursor-pointer bg-white p-5 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md hover:border-brand-300 transition text-center group">
+                <div class="w-12 h-12 bg-purple-50 text-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-3 text-2xl group-hover:scale-110 transition">
+                    🏢
+                </div>
+                <h3 class="font-bold text-gray-900">Apartamentos</h3>
+                <p class="text-xs text-gray-500 mt-1">Diferentes tamanhos e T0-T4</p>
+            </div>
+
+            <!-- Card Terrenos -->
+            <div onclick="filterByCategory('Terreno')" class="cursor-pointer bg-white p-5 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md hover:border-brand-300 transition text-center group">
+                <div class="w-12 h-12 bg-amber-50 text-amber-600 rounded-2xl flex items-center justify-center mx-auto mb-3 text-2xl group-hover:scale-110 transition">
+                    🌳
+                </div>
+                <h3 class="font-bold text-gray-900">Terrenos</h3>
+                <p class="text-xs text-gray-500 mt-1">Construção ou investimento</p>
+            </div>
+
+            <!-- Card Espaços Comerciais -->
+            <div onclick="filterByCategory('Espaço Comercial')" class="cursor-pointer bg-white p-5 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md hover:border-brand-300 transition text-center group col-span-2 sm:col-span-1">
+                <div class="w-12 h-12 bg-rose-50 text-rose-600 rounded-2xl flex items-center justify-center mx-auto mb-3 text-2xl group-hover:scale-110 transition">
+                    🏪
+                </div>
+                <h3 class="font-bold text-gray-900">Comercial</h3>
+                <p class="text-xs text-gray-500 mt-1">Lojas, escritórios, armazéns</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- ========================================== -->
+    <!-- SEÇÃO IMÓVEIS EM DESTAQUE                  -->
+    <!-- ========================================== -->
+    <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div class="flex items-center justify-between mb-6">
+            <div class="flex items-center gap-2">
+                <span class="text-2xl">🔥</span>
+                <h2 class="text-2xl font-black text-gray-900">Imóveis em Destaque</h2>
+            </div>
+            <span id="propertyCountTag" class="text-xs font-bold bg-brand-100 text-brand-800 px-3 py-1 rounded-full">Carregando...</span>
+        </div>
+
+        <!-- Grid Dinâmico de Imóveis -->
+        <div id="propertiesGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <!-- Renderizado via Javascript -->
+        </div>
+    </section>
+
+    <!-- ========================================== -->
+    <!-- SEÇÃO EXPLORAR NO MAPA (MOÇAMBIQUE)        -->
+    <!-- ========================================== -->
+    <section id="mapa-section" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div class="bg-white p-6 rounded-3xl border border-gray-200 shadow-xl overflow-hidden">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+                <div>
+                    <div class="flex items-center gap-2 text-brand-600 font-bold text-sm mb-1">
+                        <i class="fa-solid fa-map-location-dot"></i> EXPLORAR POR CIDADE
+                    </div>
+                    <h2 class="text-2xl font-black text-gray-900">Encontre imóveis perto de si no Mapa</h2>
+                </div>
+                
+                <!-- Quick City Selector Buttons -->
+                <div class="flex items-center gap-1.5 overflow-x-auto pb-2 no-scrollbar">
+                    <button onclick="flyToCity(-25.9692, 32.5732, 'Maputo')" class="px-3 py-1.5 bg-gray-100 hover:bg-brand-600 hover:text-white rounded-xl text-xs font-bold text-gray-700 transition shrink-0">📍 Maputo</button>
+                    <button onclick="flyToCity(-12.9729, 40.5181, 'Pemba')" class="px-3 py-1.5 bg-gray-100 hover:bg-brand-600 hover:text-white rounded-xl text-xs font-bold text-gray-700 transition shrink-0">📍 Pemba</button>
+                    <button onclick="flyToCity(-15.1162, 39.2666, 'Nampula')" class="px-3 py-1.5 bg-gray-100 hover:bg-brand-600 hover:text-white rounded-xl text-xs font-bold text-gray-700 transition shrink-0">📍 Nampula</button>
+                    <button onclick="flyToCity(-19.8436, 34.8389, 'Beira')" class="px-3 py-1.5 bg-gray-100 hover:bg-brand-600 hover:text-white rounded-xl text-xs font-bold text-gray-700 transition shrink-0">📍 Beira</button>
+                    <button onclick="flyToCity(-25.6322, 32.5103, 'Matola')" class="px-3 py-1.5 bg-gray-100 hover:bg-brand-600 hover:text-white rounded-xl text-xs font-bold text-gray-700 transition shrink-0">📍 Matola</button>
+                </div>
+            </div>
+
+            <!-- Leaflet Container -->
+            <div id="mozambiqueMap" class="w-full h-[450px] rounded-2xl z-10 border border-gray-200"></div>
+        </div>
+    </section>
+
+    <!-- ========================================== -->
+    <!-- COMO FUNCIONA E CÁLCULO DE SEGURANÇA (10%) -->
+    <!-- ========================================== -->
+    <section class="bg-emerald-900 text-white py-16 px-4 my-12 relative overflow-hidden">
+        <div class="max-w-7xl mx-auto relative z-10">
+            <div class="text-center max-w-3xl mx-auto mb-12">
+                <span class="bg-brand-500/20 text-brand-300 font-bold text-xs uppercase px-3 py-1 rounded-full border border-brand-500/30">
+                    🛡️ Garantia de Negócio Seguro
+                </span>
+                <h2 class="text-3xl md:text-4xl font-black mt-3">Como funciona o Pagamento Protegido?</h2>
+                <p class="text-emerald-100 text-sm md:text-base mt-2">
+                    Protegemos o cliente e garantimos que o proprietário recebe os seus 90% sem fraudes ou complicações.
+                </p>
+            </div>
+
+            <!-- Passos -->
+            <div class="grid grid-cols-1 md:grid-cols-5 gap-4 mb-12">
+                <div class="bg-emerald-800/60 backdrop-blur border border-emerald-700 p-5 rounded-2xl text-center">
+                    <span class="w-8 h-8 bg-brand-500 text-white rounded-full flex items-center justify-center font-bold text-sm mx-auto mb-3">1</span>
+                    <h3 class="font-bold text-sm">Pesquise</h3>
+                    <p class="text-xs text-emerald-200 mt-1">Encontre o imóvel desejado em qualquer ponto do país.</p>
+                </div>
+                <div class="bg-emerald-800/60 backdrop-blur border border-emerald-700 p-5 rounded-2xl text-center">
+                    <span class="w-8 h-8 bg-brand-500 text-white rounded-full flex items-center justify-center font-bold text-sm mx-auto mb-3">2</span>
+                    <h3 class="font-bold text-sm">Escolha</h3>
+                    <p class="text-xs text-emerald-200 mt-1">Analise as fotos, verificação do proprietário e características.</p>
+                </div>
+                <div class="bg-emerald-800/60 backdrop-blur border border-emerald-700 p-5 rounded-2xl text-center">
+                    <span class="w-8 h-8 bg-brand-500 text-white rounded-full flex items-center justify-center font-bold text-sm mx-auto mb-3">3</span>
+                    <h3 class="font-bold text-sm">Pague na Plataforma</h3>
+                    <p class="text-xs text-emerald-200 mt-1">Via M-Pesa ou e-Mola. O valor fica retido com segurança.</p>
+                </div>
+                <div class="bg-emerald-800/60 backdrop-blur border border-emerald-700 p-5 rounded-2xl text-center">
+                    <span class="w-8 h-8 bg-brand-500 text-white rounded-full flex items-center justify-center font-bold text-sm mx-auto mb-3">4</span>
+                    <h3 class="font-bold text-sm">Confirme Entrada</h3>
+                    <p class="text-xs text-emerald-200 mt-1">Visite e receba as chaves do imóvel.</p>
+                </div>
+                <div class="bg-emerald-800/60 backdrop-blur border border-emerald-700 p-5 rounded-2xl text-center">
+                    <span class="w-8 h-8 bg-brand-500 text-white rounded-full flex items-center justify-center font-bold text-sm mx-auto mb-3">5</span>
+                    <h3 class="font-bold text-sm">Libertação 90/10</h3>
+                    <p class="text-xs text-emerald-200 mt-1">A plataforma entrega 90% ao proprietário e retém 10%.</p>
+                </div>
+            </div>
+
+            <!-- Interactive Escrow Calculator -->
+            <div class="bg-white text-gray-800 p-6 rounded-3xl max-w-2xl mx-auto shadow-2xl border border-emerald-100">
+                <h3 class="font-extrabold text-lg text-center mb-4 text-gray-900 flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-calculator text-brand-600"></i> Simulador Transparente de Comissão (10%)
+                </h3>
+                
+                <div class="mb-4">
+                    <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Insira o Valor da Transação (MT)</label>
+                    <input type="number" id="calcInput" value="25000" oninput="calculateCommission()" class="w-full border-2 border-gray-200 focus:border-brand-500 rounded-xl p-3 font-extrabold text-xl text-gray-900 outline-none">
+                </div>
+
+                <div class="grid grid-cols-2 gap-4 pt-2 border-t border-gray-100">
+                    <div class="bg-emerald-50 p-4 rounded-2xl border border-emerald-100 text-center">
+                        <span class="text-xs font-bold text-emerald-700 uppercase block">Proprietário Recebe (90%)</span>
+                        <span id="ownerAmount" class="text-2xl font-black text-brand-700 mt-1 block">22.500 MT</span>
+                    </div>
+                    <div class="bg-gray-50 p-4 rounded-2xl border border-gray-200 text-center">
+                        <span class="text-xs font-bold text-gray-500 uppercase block">Taxa da Plataforma (10%)</span>
+                        <span id="platformAmount" class="text-2xl font-black text-gray-800 mt-1 block">2.500 MT</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ========================================== -->
+    <!-- RODAPÉ COMPLETO                            -->
+    <!-- ========================================== -->
+    <footer class="bg-gray-900 text-gray-400 py-12 px-4 border-t border-gray-800">
+        <div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+            <div>
+                <a href="#" class="flex items-center gap-2 mb-4">
+                    <div class="w-8 h-8 bg-brand-600 rounded-xl flex items-center justify-center text-white font-bold">
+                        <i class="fa-solid fa-house-chimney"></i>
+                    </div>
+                    <span class="text-xl font-black text-white">Pra <span class="text-brand-500">ti</span></span>
+                </a>
+                <p class="text-xs text-gray-400 leading-relaxed">
+                    A primeira plataforma imobiliária com pagamentos protegidos e garantia de negócio em Moçambique.
+                </p>
+            </div>
+
+            <div>
+                <h4 class="text-white font-bold text-sm mb-3 uppercase tracking-wider">Cidades Principais</h4>
+                <ul class="space-y-2 text-xs">
+                    <li><button onclick="filterByCity('Maputo')" class="hover:text-white transition">Imóveis em Maputo</button></li>
+                    <li><button onclick="filterByCity('Pemba')" class="hover:text-white transition">Imóveis em Pemba</button></li>
+                    <li><button onclick="filterByCity('Nampula')" class="hover:text-white transition">Imóveis em Nampula</button></li>
+                    <li><button onclick="filterByCity('Beira')" class="hover:text-white transition">Imóveis na Beira</button></li>
+                </ul>
+            </div>
+
+            <div>
+                <h4 class="text-white font-bold text-sm mb-3 uppercase tracking-wider">Métodos de Pagamento</h4>
+                <div class="flex flex-wrap gap-2 text-xs">
+                    <span class="px-2.5 py-1 bg-gray-800 text-red-400 font-bold rounded">M-Pesa</span>
+                    <span class="px-2.5 py-1 bg-gray-800 text-orange-400 font-bold rounded">e-Mola</span>
+                    <span class="px-2.5 py-1 bg-gray-800 text-blue-400 font-bold rounded">Millennium BIM</span>
+                    <span class="px-2.5 py-1 bg-gray-800 text-emerald-400 font-bold rounded">BCI</span>
+                </div>
+            </div>
+
+            <div>
+                <h4 class="text-white font-bold text-sm mb-3 uppercase tracking-wider">Apoio ao Cliente</h4>
+                <p class="text-xs text-gray-400 mb-2">Suporte via WhatsApp 24/7</p>
+                <a href="https://wa.me/258840000000" target="_blank" class="inline-flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-xl text-xs font-bold transition">
+                    <i class="fa-brands fa-whatsapp text-sm"></i> Falar com Suporte
+                </a>
+            </div>
+        </div>
+
+        <div class="max-w-7xl mx-auto pt-6 border-t border-gray-800 flex flex-col md:flex-row items-center justify-between text-xs text-gray-500 gap-4">
+            <p>© 2026 Pra ti Moçambique. Todos os direitos reservados.</p>
+            <div class="flex gap-4">
+                <a href="#" class="hover:text-gray-300">Termos de Uso</a>
+                <a href="#" class="hover:text-gray-300">Política de Privacidade</a>
+                <a href="#" class="hover:text-gray-300">Regras de Comissão (10%)</a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- ========================================== -->
+    <!-- NAVEGAÇÃO INFERIOR MOBILE (Estilo App)    -->
+    <!-- ========================================== -->
+    <div class="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-40 px-3 py-2 flex items-center justify-around text-gray-500 shadow-lg">
+        <button onclick="window.scrollTo({top: 0, behavior: 'smooth'})" class="flex flex-col items-center gap-0.5 text-brand-600 font-bold">
+            <i class="fa-solid fa-house text-lg"></i>
+            <span class="text-[10px]">Início</span>
+        </button>
+
+        <a href="#mapa-section" class="flex flex-col items-center gap-0.5 hover:text-brand-600">
+            <i class="fa-solid fa-map text-lg"></i>
+            <span class="text-[10px]">Mapa</span>
+        </a>
+
+        <!-- Floating action button add property -->
+        <button onclick="openModal('addPropertyModal')" class="flex flex-col items-center justify-center w-12 h-12 bg-brand-600 text-white rounded-full -mt-5 shadow-lg shadow-brand-600/40">
+            <i class="fa-solid fa-plus text-xl"></i>
+        </button>
+
+        <button onclick="openModal('dashboardModal')" class="flex flex-col items-center gap-0.5 hover:text-brand-600">
+            <i class="fa-solid fa-wallet text-lg"></i>
+            <span class="text-[10px]">Painel</span>
+        </button>
+
+        <button onclick="openWelcomeModal()" class="flex flex-col items-center gap-0.5 hover:text-brand-600">
+            <i class="fa-solid fa-shield text-lg"></i>
+            <span class="text-[10px]">Garantia</span>
+        </button>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- MODAL 1: DETALHES DO IMÓVEL                -->
+    <!-- ========================================== -->
+    <div id="detailModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm overflow-y-auto">
+        <div class="bg-white rounded-3xl max-w-3xl w-full p-6 my-8 shadow-2xl relative">
+            <button onclick="closeModal('detailModal')" class="absolute top-4 right-4 text-gray-400 hover:text-gray-700 w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center z-10">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+
+            <div id="detailContent">
+                <!-- Preenchido via JavaScript -->
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- MODAL 2: PAGAMENTO PROTEGIDO (ESCROW)      -->
+    <!-- ========================================== -->
+    <div id="paymentModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
+        <div class="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl relative">
+            <button onclick="closeModal('paymentModal')" class="absolute top-4 right-4 text-gray-400 hover:text-gray-700 w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+
+            <div class="flex items-center gap-3 mb-4">
+                <div class="w-10 h-10 bg-emerald-100 text-brand-600 rounded-xl flex items-center justify-center text-lg font-bold">
+                    🛡️
+                </div>
+                <div>
+                    <h3 class="text-lg font-bold text-gray-900">Pagamento Protegido</h3>
+                    <p class="text-xs text-gray-500">Reserva de Imóvel com Garantia Pra ti</p>
+                </div>
+            </div>
+
+            <div id="paymentSummary" class="bg-gray-50 p-4 rounded-2xl border border-gray-200 mb-4 text-xs space-y-2">
+                <!-- Detalhes do cálculo gravados no JS -->
+            </div>
+
+            <form onsubmit="processPayment(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Selecione o Método de Pagamento</label>
+                    <div class="grid grid-cols-2 gap-3">
+                        <label class="border-2 border-brand-500 bg-brand-50/50 p-3 rounded-xl flex items-center gap-2 cursor-pointer font-bold text-xs">
+                            <input type="radio" name="payMethod" value="mpesa" checked class="accent-brand-600">
+                            <span class="text-red-600">M-Pesa</span>
+                        </label>
+                        <label class="border-2 border-gray-200 p-3 rounded-xl flex items-center gap-2 cursor-pointer font-bold text-xs">
+                            <input type="radio" name="payMethod" value="emola" class="accent-brand-600">
+                            <span class="text-orange-600">e-Mola</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Número de Telefone (Moçambique)</label>
+                    <input type="tel" placeholder="84 / 85 / 86 / 87 000 0000" required class="w-full border border-gray-300 rounded-xl p-3 text-sm font-bold focus:ring-2 focus:ring-brand-500 outline-none">
+                </div>
+
+                <button type="submit" class="w-full bg-brand-600 hover:bg-brand-700 text-white font-bold py-3.5 px-4 rounded-xl shadow-lg shadow-brand-600/30 transition text-sm flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-lock text-xs"></i>
+                    <span>Confirmar e Pagar em Segurança</span>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- MODAL 3: PUBLICAR NOVO IMÓVEL              -->
+    <!-- ========================================== -->
+    <div id="addPropertyModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm overflow-y-auto">
+        <div class="bg-white rounded-3xl max-w-xl w-full p-6 my-8 shadow-2xl relative">
+            <button onclick="closeModal('addPropertyModal')" class="absolute top-4 right-4 text-gray-400 hover:text-gray-700 w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+
+            <h3 class="text-xl font-extrabold text-gray-900 mb-1">+ Publicar Imóvel em Moçambique</h3>
+            <p class="text-xs text-gray-500 mb-6">Receba 90% do valor da transação diretamente na sua conta.</p>
+
+            <form onsubmit="handleCreateProperty(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Título do Anúncio</label>
+                    <input type="text" id="newTitle" placeholder="Ex: Casa T3 com Piscina em Pemba" required class="w-full border border-gray-300 rounded-xl p-3 text-sm focus:ring-2 focus:ring-brand-500 outline-none">
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Finalidade</label>
+                        <select id="newPurpose" class="w-full border border-gray-300 rounded-xl p-3 text-sm font-semibold outline-none">
+                            <option value="Arrendar">Arrendar</option>
+                            <option value="Comprar">Vender</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Categoria</label>
+                        <select id="newCategory" class="w-full border border-gray-300 rounded-xl p-3 text-sm font-semibold outline-none">
+                            <option value="Casa">Casa</option>
+                            <option value="Quarto">Quarto</option>
+                            <option value="Apartamento">Apartamento</option>
+                            <option value="Terreno">Terreno</option>
+                            <option value="Espaço Comercial">Espaço Comercial</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Cidade</label>
+                        <select id="newCity" class="w-full border border-gray-300 rounded-xl p-3 text-sm font-semibold outline-none">
+                            <option value="Maputo">Maputo</option>
+                            <option value="Pemba">Pemba</option>
+                            <option value="Nampula">Nampula</option>
+                            <option value="Beira">Beira</option>
+                            <option value="Matola">Matola</option>
+                            <option value="Chimoio">Chimoio</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Bairro / Zona</label>
+                        <input type="text" id="newLocation" placeholder="Ex: Natite, Wimbe..." required class="w-full border border-gray-300 rounded-xl p-3 text-sm outline-none">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Preço Total (MT)</label>
+                    <input type="number" id="newPrice" placeholder="25000" required class="w-full border border-gray-300 rounded-xl p-3 text-sm font-bold outline-none">
+                </div>
+
+                <div class="grid grid-cols-3 gap-2 text-xs">
+                    <div>
+                        <label class="block font-bold text-gray-500 mb-1">Quartos</label>
+                        <input type="number" id="newBeds" value="2" class="w-full border p-2 rounded-lg text-center font-bold">
+                    </div>
+                    <div>
+                        <label class="block font-bold text-gray-500 mb-1">Casas de Banho</label>
+                        <input type="number" id="newBaths" value="1" class="w-full border p-2 rounded-lg text-center font-bold">
+                    </div>
+                    <div>
+                        <label class="block font-bold text-gray-500 mb-1">Garagem</label>
+                        <input type="number" id="newGarages" value="1" class="w-full border p-2 rounded-lg text-center font-bold">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-gray-600 uppercase mb-1">URL da Fotografia</label>
+                    <input type="url" id="newImage" placeholder="https://images.unsplash.com/..." class="w-full border border-gray-300 rounded-xl p-3 text-sm outline-none">
+                </div>
+
+                <div class="bg-emerald-50 p-3 rounded-xl border border-emerald-100 text-xs text-emerald-800">
+                    ℹ️ <strong>Cálculo Automático de Comissão:</strong> Você receberá 90% do valor retido no momento em que o cliente fechar o negócio através da plataforma.
+                </div>
+
+                <button type="submit" class="w-full bg-brand-600 hover:bg-brand-700 text-white font-bold py-3 px-4 rounded-xl shadow-md transition">
+                    Publicar Imóvel Agora
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- MODAL 4: PAINEL DO ANUNCIANTE              -->
+    <!-- ========================================== -->
+    <div id="dashboardModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
+        <div class="bg-white rounded-3xl max-w-2xl w-full p-6 shadow-2xl relative max-h-[90vh] overflow-y-auto">
+            <button onclick="closeModal('dashboardModal')" class="absolute top-4 right-4 text-gray-400 hover:text-gray-700 w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+
+            <h3 class="text-2xl font-black text-gray-900 mb-4">Painel do Anunciante</h3>
+
+            <!-- Extrato de Saldo -->
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+                <div class="bg-brand-50 p-4 rounded-2xl border border-brand-100">
+                    <span class="text-xs font-bold text-brand-700 uppercase">Saldo Disponível (90%)</span>
+                    <h4 class="text-2xl font-black text-brand-700 mt-1">45.000 MT</h4>
+                </div>
+                <div class="bg-gray-50 p-4 rounded-2xl border border-gray-200">
+                    <span class="text-xs font-bold text-gray-500 uppercase">Comissões Retidas (10%)</span>
+                    <h4 class="text-2xl font-black text-gray-800 mt-1">5.000 MT</h4>
+                </div>
+                <div class="bg-blue-50 p-4 rounded-2xl border border-blue-100">
+                    <span class="text-xs font-bold text-blue-700 uppercase">Negócios Fechados</span>
+                    <h4 class="text-2xl font-black text-blue-700 mt-1">2</h4>
+                </div>
+            </div>
+
+            <h4 class="font-bold text-sm text-gray-800 mb-3">Histórico de Transações Recentes</h4>
+            <div class="space-y-2 text-xs mb-6">
+                <div class="flex items-center justify-between p-3 bg-gray-50 rounded-xl border border-gray-100">
+                    <div>
+                        <span class="font-bold text-gray-800 block">Arrendamento Casa T3 em Pemba</span>
+                        <span class="text-gray-400">Cliente pagou via M-Pesa • Há 2 dias</span>
+                    </div>
+                    <div class="text-right">
+                        <span class="font-bold text-brand-600 block">+ 22.500 MT</span>
+                        <span class="text-gray-400">Taxa: 2.500 MT</span>
+                    </div>
+                </div>
+            </div>
+
+            <button onclick="alert('Solicitação de Levantamento enviada para M-Pesa!')" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-xl shadow transition">
+                Levantar Saldo via M-Pesa / e-Mola
+            </button>
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- JAVASCRIPT E LÓGICA COMPLETA               -->
+    <!-- ========================================== -->
+    <script>
+        // Base de Dados Inicial de Imóveis em Moçambique
+        const initialProperties = [
+            {
+                id: 1,
+                title: "Casa T3 Moderna em Pemba",
+                category: "Casa",
+                purpose: "Arrendar",
+                city: "Pemba",
+                location: "Natite, Pemba",
+                price: 25000,
+                priceUnit: "MT/mês",
+                verified: true,
+                beds: 3,
+                baths: 2,
+                garages: 2,
+                image: "https://images.unsplash.com/photo-1580587771525-78b9dba3b914?auto=format&fit=crop&w=800&q=80",
+                coords: [-12.9729, 40.5181],
+                owner: "Constantino A.",
+                phone: "+258 84 123 4567"
+            },
+            {
+                id: 2,
+                title: "Apartamento T2 na Polana",
+                category: "Apartamento",
+                purpose: "Arrendar",
+                city: "Maputo",
+                location: "Polana Cimento, Maputo",
+                price: 45000,
+                priceUnit: "MT/mês",
+                verified: true,
+                beds: 2,
+                baths: 1,
+                garages: 1,
+                image: "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=800&q=80",
+                coords: [-25.9692, 32.5732],
+                owner: "Isabel M.",
+                phone: "+258 85 987 6543"
+            },
+            {
+                id: 3,
+                title: "Quarto Suite com AC perto da Universidade",
+                category: "Quarto",
+                purpose: "Arrendar",
+                city: "Nampula",
+                location: "Nampula Central",
+                price: 8500,
+                priceUnit: "MT/mês",
+                verified: true,
+                beds: 1,
+                baths: 1,
+                garages: 0,
+                image: "https://images.unsplash.com/photo-1598928506311-c55ded91a20c?auto=format&fit=crop&w=800&q=80",
+                coords: [-15.1162, 39.2666],
+                owner: "Salomão B.",
+                phone: "+258 86 444 3322"
+            },
+            {
+                id: 4,
+                title: "Terreno 30x40m Pronto a Construir",
+                category: "Terreno",
+                purpose: "Comprar",
+                city: "Matola",
+                location: "Malhampsene, Matola",
+                price: 650000,
+                priceUnit: "MT",
+                verified: true,
+                beds: 0,
+                baths: 0,
+                garages: 0,
+                image: "https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=800&q=80",
+                coords: [-25.6322, 32.5103],
+                owner: "Anatolia F.",
+                phone: "+258 87 111 2233"
+            },
+            {
+                id: 5,
+                title: "Espaço Comercial / Loja na Av. Samora Machel",
+                category: "Espaço Comercial",
+                purpose: "Arrendar",
+                city: "Beira",
+                location: "Pontagêa, Beira",
+                price: 35000,
+                priceUnit: "MT/mês",
+                verified: true,
+                beds: 0,
+                baths: 2,
+                garages: 3,
+                image: "https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=800&q=80",
+                coords: [-19.8436, 34.8389],
+                owner: "Mouzinho R.",
+                phone: "+258 84 999 8877"
+            }
+        ];
+
+        // Carregar do LocalStorage ou Inicializar
+        let properties = JSON.parse(localStorage.getItem('prati_properties')) || initialProperties;
+        let activePurpose = 'all';
+        let mapInstance = null;
+        let markersGroup = [];
+
+        window.onload = function() {
+            // Verificar pop-up de boas-vindas
+            if (!localStorage.getItem('prati_welcomed')) {
+                document.getElementById('welcomeModal').classList.remove('hidden');
+            } else {
+                document.getElementById('welcomeModal').classList.add('hidden');
+            }
+
+            renderProperties(properties);
+            initLeafletMap();
+            calculateCommission();
+        };
+
+        // Modal Welcome Handlers
+        function closeWelcomeModal() {
+            document.getElementById('welcomeModal').classList.add('hidden');
+            localStorage.setItem('prati_welcomed', 'true');
+        }
+
+        function openWelcomeModal() {
+            document.getElementById('welcomeModal').classList.remove('hidden');
+        }
+
+        function renderProperties(items) {
+            const grid = document.getElementById('propertiesGrid');
+            const countTag = document.getElementById('propertyCountTag');
+            
+            countTag.innerText = `${items.length} Imóveis Encontrados`;
+            grid.innerHTML = '';
+
+            if (items.length === 0) {
+                grid.innerHTML = `
+                    <div class="col-span-full text-center py-12 bg-white rounded-3xl border border-gray-100">
+                        <i class="fa-solid fa-house-circle-xmark text-4xl text-gray-300 mb-3 block"></i>
+                        <h3 class="font-bold text-gray-700">Nenhum imóvel encontrado</h3>
+                        <p class="text-xs text-gray-400 mt-1">Tente alterar os termos da sua pesquisa ou cidade.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            items.forEach(item => {
+                const card = document.createElement('div');
+                card.className = "bg-white rounded-3xl border border-gray-100 shadow-sm hover:shadow-xl transition duration-300 overflow-hidden flex flex-col group";
+                
+                card.innerHTML = `
+                    <div class="relative h-52 overflow-hidden">
+                        <img src="${item.image}" alt="${item.title}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
+                        <div class="absolute top-3 left-3 flex gap-2">
+                            <span class="bg-gray-900/80 backdrop-blur text-white text-[10px] font-extrabold px-2.5 py-1 rounded-full uppercase tracking-wider">
+                                ${item.purpose}
+                            </span>
+                            ${item.verified ? '<span class="bg-emerald-500 text-white text-[10px] font-extrabold px-2.5 py-1 rounded-full flex items-center gap-1 shadow"><i class="fa-solid fa-circle-check"></i> Verificado</span>' : ''}
+                        </div>
+                        <span class="absolute bottom-3 right-3 bg-white/95 backdrop-blur text-gray-900 font-black text-sm px-3 py-1 rounded-xl shadow-md">
+                            ${item.price.toLocaleString()} MT <span class="text-[10px] font-normal text-gray-500">${item.priceUnit || ''}</span>
+                        </span>
+                    </div>
+
+                    <div class="p-5 flex-1 flex flex-col justify-between">
+                        <div>
+                            <span class="text-[10px] font-bold text-brand-600 uppercase tracking-wider block mb-1">${item.category}</span>
+                            <h3 class="font-extrabold text-gray-900 text-base leading-snug group-hover:text-brand-600 transition mb-2">${item.title}</h3>
+                            <p class="text-xs text-gray-500 flex items-center gap-1 mb-4">
+                                <i class="fa-solid fa-location-dot text-brand-500"></i> ${item.location}
+                            </p>
+                        </div>
+
+                        <div class="pt-3 border-t border-gray-100 flex items-center justify-between">
+                            <div class="flex items-center gap-3 text-xs font-bold text-gray-600">
+                                ${item.beds > 0 ? `<span><i class="fa-solid fa-bed text-gray-400"></i> ${item.beds}</span>` : ''}
+                                ${item.baths > 0 ? `<span><i class="fa-solid fa-bath text-gray-400"></i> ${item.baths}</span>` : ''}
+                                ${item.garages > 0 ? `<span><i class="fa-solid fa-car text-gray-400"></i> ${item.garages}</span>` : ''}
+                            </div>
+                            
+                            <button onclick="openDetailModal(${item.id})" class="bg-brand-50 hover:bg-brand-600 hover:text-white text-brand-700 font-bold text-xs px-3.5 py-2 rounded-xl transition">
+                                Ver Detalhes
+                            </button>
+                        </div>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        function setSearchPurpose(purpose) {
+            activePurpose = purpose;
+            document.getElementById('tabAll').className = purpose === 'all' ? "px-5 py-2 rounded-xl font-bold text-sm bg-brand-600 text-white transition shadow-sm" : "px-5 py-2 rounded-xl font-bold text-sm text-gray-600 hover:bg-gray-100 transition";
+            document.getElementById('tabArrendar').className = purpose === 'Arrendar' ? "px-5 py-2 rounded-xl font-bold text-sm bg-brand-600 text-white transition shadow-sm" : "px-5 py-2 rounded-xl font-bold text-sm text-gray-600 hover:bg-gray-100 transition";
+            document.getElementById('tabComprar').className = purpose === 'Comprar' ? "px-5 py-2 rounded-xl font-bold text-sm bg-brand-600 text-white transition shadow-sm" : "px-5 py-2 rounded-xl font-bold text-sm text-gray-600 hover:bg-gray-100 transition";
+            applyFilters();
+        }
+
+        function filterByPurpose(purpose) {
+            setSearchPurpose(purpose);
+            window.scrollTo({top: 400, behavior: 'smooth'});
+        }
+
+        function filterByCategory(cat) {
+            document.getElementById('searchCategory').value = cat;
+            applyFilters();
+            window.scrollTo({top: 500, behavior: 'smooth'});
+        }
+
+        function filterByCity(cityName) {
+            document.getElementById('searchCity').value = cityName;
+            applyFilters();
+        }
+
+        function applyFilters() {
+            const category = document.getElementById('searchCategory').value;
+            const city = document.getElementById('searchCity').value;
+            const maxPrice = document.getElementById('searchPrice').value;
+
+            const filtered = properties.filter(item => {
+                const matchPurpose = activePurpose === 'all' || item.purpose === activePurpose;
+                const matchCategory = category === 'all' || item.category === category;
+                const matchCity = city === 'all' || item.city.toLowerCase() === city.toLowerCase();
+                const matchPrice = maxPrice === 'all' || item.price <= parseInt(maxPrice);
+                return matchPurpose && matchCategory && matchCity && matchPrice;
+            });
+
+            renderProperties(filtered);
+            updateMapMarkers(filtered);
+        }
+
+        function initLeafletMap() {
+            // Coordenadas centralizadas em Moçambique
+            mapInstance = L.map('mozambiqueMap').setView([-18.665695, 35.529562], 5);
+
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; OpenStreetMap contributors'
+            }).addTo(mapInstance);
+
+            updateMapMarkers(properties);
+        }
+
+        function updateMapMarkers(items) {
+            if (!mapInstance) return;
+
+            // Clear old markers
+            markersGroup.forEach(marker => mapInstance.removeLayer(marker));
+            markersGroup = [];
+
+            items.forEach(item => {
+                if (item.coords) {
+                    const marker = L.marker(item.coords).addTo(mapInstance);
+                    marker.bindPopup(`
+                        <div class="text-left font-sans">
+                            <img src="${item.image}" class="w-full h-24 object-cover">
+                            <div class="p-2">
+                                <strong class="text-xs text-gray-900 block">${item.title}</strong>
+                                <span class="text-emerald-600 font-black text-sm">${item.price.toLocaleString()} MT</span>
+                                <button onclick="openDetailModal(${item.id})" class="mt-2 w-full bg-brand-600 text-white text-[10px] font-bold py-1 rounded">Ver Imóvel</button>
+                            </div>
+                        </div>
+                    `);
+                    markersGroup.push(marker);
+                }
+            });
+        }
+
+        function flyToCity(lat, lng, cityName) {
+            if (mapInstance) {
+                mapInstance.flyTo([lat, lng], 12);
+                filterByCity(cityName);
+            }
+        }
+
+        function openModal(modalId) {
+            document.getElementById(modalId).classList.remove('hidden');
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.add('hidden');
+        }
+
+        function calculateCommission() {
+            const val = parseFloat(document.getElementById('calcInput').value) || 0;
+            const owner = val * 0.90;
+            const platform = val * 0.10;
+
+            document.getElementById('ownerAmount').innerText = `${owner.toLocaleString('pt-MZ')} MT`;
+            document.getElementById('platformAmount').innerText = `${platform.toLocaleString('pt-MZ')} MT`;
+        }
+
+        function openDetailModal(id) {
+            const item = properties.find(p => p.id === id);
+            if (!item) return;
+
+            const ownerPay = item.price * 0.90;
+            const platformPay = item.price * 0.10;
+
+            document.getElementById('detailContent').innerHTML = `
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="rounded-2xl overflow-hidden h-64 md:h-full">
+                        <img src="${item.image}" class="w-full h-full object-cover">
+                    </div>
+                    <div>
+                        <div class="flex items-center gap-2 mb-2">
+                            <span class="bg-brand-100 text-brand-800 text-xs font-bold px-2.5 py-0.5 rounded-full">${item.purpose}</span>
+                            ${item.verified ? '<span class="bg-emerald-500 text-white text-xs font-bold px-2.5 py-0.5 rounded-full">🟢 Proprietário Verificado</span>' : ''}
+                        </div>
+                        <h2 class="text-2xl font-black text-gray-900 mb-2">${item.title}</h2>
+                        <p class="text-sm text-gray-500 mb-4"><i class="fa-solid fa-location-dot text-brand-500"></i> ${item.location}</p>
+
+                        <div class="bg-gray-50 p-4 rounded-2xl border border-gray-100 mb-4">
+                            <span class="text-xs font-bold text-gray-400 uppercase">Preço do Anúncio</span>
+                            <div class="text-3xl font-black text-brand-600">${item.price.toLocaleString()} MT <span class="text-sm font-medium text-gray-500">${item.priceUnit || ''}</span></div>
+                        </div>
+
+                        <div class="space-y-2 text-xs mb-6">
+                            <div class="flex justify-between py-1 border-b"><span class="text-gray-500">Anunciante</span> <strong class="text-gray-800">${item.owner}</strong></div>
+                            <div class="flex justify-between py-1 border-b"><span class="text-gray-500">Garantia</span> <strong class="text-emerald-600">Pagamento Protegido Pra ti</strong></div>
+                            <div class="flex justify-between py-1 border-b"><span class="text-gray-500">Repartição</span> <strong class="text-gray-700">90% Proprietário / 10% Plataforma</strong></div>
+                        </div>
+
+                        <div class="flex gap-3">
+                            <button onclick="startEscrowPayment(${item.price}, '${item.title}')" class="flex-1 bg-brand-600 hover:bg-brand-700 text-white font-bold py-3.5 px-4 rounded-2xl shadow-lg transition text-xs flex items-center justify-center gap-2">
+                                <i class="fa-solid fa-shield-halved"></i>
+                                <span>Iniciar Pagamento Protegido</span>
+                            </button>
+                            <a href="https://wa.me/258840000000?text=Olá, tenho interesse no imóvel ${encodeURIComponent(item.title)}" target="_blank" class="bg-emerald-100 text-emerald-800 hover:bg-emerald-200 font-bold p-3.5 rounded-2xl transition flex items-center justify-center">
+                                <i class="fa-brands fa-whatsapp text-lg"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            `;
+            openModal('detailModal');
+        }
+
+        function startEscrowPayment(price, title) {
+            closeModal('detailModal');
+            const owner = price * 0.90;
+            const platform = price * 0.10;
+
+            document.getElementById('paymentSummary').innerHTML = `
+                <div class="font-bold text-gray-800 mb-1">${title}</div>
+                <div class="flex justify-between text-gray-600"><span>Valor Total:</span> <strong>${price.toLocaleString()} MT</strong></div>
+                <div class="flex justify-between text-emerald-700"><span>Ao Proprietário (90% Custódia):</span> <strong>${owner.toLocaleString()} MT</strong></div>
+                <div class="flex justify-between text-gray-500"><span>Taxa de Proteção Plataforma (10%):</span> <strong>${platform.toLocaleString()} MT</strong></div>
+            `;
+
+            openModal('paymentModal');
+        }
+
+        function processPayment(e) {
+            e.preventDefault();
+            alert('Transação M-Pesa / e-Mola iniciada! Confirme a mensagem PIN no seu telemóvel para reter o valor em custódia protegida.');
+            closeModal('paymentModal');
+        }
+
+        function handleCreateProperty(e) {
+            e.preventDefault();
+            const newProp = {
+                id: Date.now(),
+                title: document.getElementById('newTitle').value,
+                purpose: document.getElementById('newPurpose').value,
+                category: document.getElementById('newCategory').value,
+                city: document.getElementById('newCity').value,
+                location: document.getElementById('newLocation').value,
+                price: parseFloat(document.getElementById('newPrice').value),
+                priceUnit: document.getElementById('newPurpose').value === 'Arrendar' ? 'MT/mês' : 'MT',
+                verified: true,
+                beds: parseInt(document.getElementById('newBeds').value) || 0,
+                baths: parseInt(document.getElementById('newBaths').value) || 0,
+                garages: parseInt(document.getElementById('newGarages').value) || 0,
+                image: document.getElementById('newImage').value || 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=800&q=80',
+                owner: "Você (Proprietário)",
+                coords: [-25.9692, 32.5732]
+            };
+
+            properties.unshift(newProp);
+            localStorage.setItem('prati_properties', JSON.stringify(properties));
+            renderProperties(properties);
+            closeModal('addPropertyModal');
+            alert('Imóvel publicado com sucesso! Já está visível na plataforma.');
+        }
+    </script>
+</body>
+</html>
